@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import com.beniezsche.tasktodo.data.User
 import com.beniezsche.tasktodo.ui.theme.TasktodoTheme
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.ktx.Firebase
@@ -51,10 +52,15 @@ class MainActivity : ComponentActivity() {
 
         setContent {
 
+            val rememberUser: MutableState<FirebaseUser?> = remember { mutableStateOf(null) }
+
             // Initialize Firebase Auth
             auth = Firebase.auth
             val user = Firebase.auth.currentUser
-            if (user != null) {
+
+            rememberUser.value = user
+
+            if (rememberUser.value != null) {
                 startActivity(Intent(this, UserListActivity::class.java))
                 finish()
             }
@@ -75,8 +81,9 @@ class MainActivity : ComponentActivity() {
                                         if (task.isSuccessful) {
                                             // Sign in success, update UI with the signed-in user's information
                                             Log.d(TAG, "signInWithEmail:success")
-                                            val user = auth.currentUser
+                                            rememberUser.value = auth.currentUser
                                             startActivity(Intent(this, UserListActivity::class.java))
+                                            finish()
                                         } else {
                                             // If sign in fails, display a message to the user.
                                             Log.w(TAG, "signInWithEmail:failure", task.exception)
@@ -329,6 +336,9 @@ fun SignUpScreen(
 fun LoginScreen(
     onLoginClicked: (email: String, password: String) -> Unit,
     onSwitchToSignUpAction: () -> Unit ) {
+
+    val context = LocalContext.current
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -369,7 +379,20 @@ fun LoginScreen(
                 .padding(top = 16.dp)
         )
         Button(
-            onClick = { onLoginClicked(email, password) },
+            onClick = {
+
+                if (email.trim().isEmpty()) {
+                    Toast.makeText(context, "Please enter a valid email", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+
+                if (password.trim().isEmpty()) {
+                    Toast.makeText(context, "Please enter a valid password", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+
+                onLoginClicked(email, password)
+                  },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 32.dp)
