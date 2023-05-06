@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">tasktodo</string>
+    <string name="title_activity_user_list">UserListActivity</string>
+    <string name="title_activity_task_list">TaskListActivity</string>
+    <string name="title_activity_add_task">AddTaskActivity</string>
+    <string name="title_activity_main2">MainActivity2</string>
+</resources>
